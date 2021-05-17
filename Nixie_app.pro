@@ -11,10 +11,18 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    module_bluetoth/characteristicinfo.cpp \
+    module_bluetoth/device.cpp \
+    module_bluetoth/deviceinfo.cpp \
+    module_bluetoth/serviceinfo.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    module_bluetoth/characteristicinfo.h \
+    module_bluetoth/device.h \
+    module_bluetoth/deviceinfo.h \
+    module_bluetoth/serviceinfo.h
 
 FORMS += \
     mainwindow.ui
@@ -23,3 +31,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    Temp_text

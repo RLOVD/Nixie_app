@@ -1,0 +1,61 @@
+
+
+void MainWindow::startDeviceDiscovery()
+{
+/*
+   QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent();
+   // discoveryAgent->setLowEnergyDiscoveryTimeout(5000);
+    connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+            this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
+    discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+    */
+    m_deviceDiscoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+    m_deviceDiscoveryAgent->setLowEnergyDiscoveryTimeout(5000);
+
+    connect(m_deviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &MainWindow::deviceDiscovered);
+   // connect(m_deviceDiscoveryAgent, static_cast<void (QBluetoothDeviceDiscoveryAgent::*)(QBluetoothDeviceDiscoveryAgent::Error)>(&QBluetoothDeviceDiscoveryAgent::error),
+     //       this, &DeviceFinder::scanError);
+
+  //  connect(m_deviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &MainWindow::scanFinished);
+   // connect(m_deviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &MainWindow::scanFinished);
+    m_deviceDiscoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+}
+
+// In your local slot, read information about the found devices
+void MainWindow::deviceDiscovered(const QBluetoothDeviceInfo &device)
+{
+    //if (device.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)
+
+
+  // If device is LowEnergy-device, add it to the list
+     if (device.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)
+    {
+         qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+        // device.append(new QBluetoothDeviceInfo(device));
+    }
+         m_control = QLowEnergyController::createCentral(m_currentDevice->getDevice(), this);
+         connect(m_control, &QLowEnergyController::serviceDiscovered,
+                 this, &MainWindow::serviceDiscovered);
+         connect(m_control, &QLowEnergyController::discoveryFinished,
+                 this, &MainWindow::serviceScanDone);
+         connect(m_control, &QLowEnergyController::connected, this, [this]()
+         {
+          qDebug() <<"Controller connected. Search services...";
+          m_control->discoverServices();
+         });
+         connect(m_control, &QLowEnergyController::disconnected, this, [this](){
+
+              qDebug() <<"LowEnergy controller disconnected";
+         });
+
+         // Connect
+         m_control->connectToDevice();
+}
+
+void MainWindow::serviceDiscovered(const QBluetoothUuid &gatt)
+{
+    if (gatt == QBluetoothUuid(QBluetoothUuid::HeartRate)) {
+        setInfo("Heart Rate service discovered. Waiting for service scan to be done...");
+        m_foundHeartRateService = true;
+    }
+}
