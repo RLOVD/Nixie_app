@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -12,7 +13,14 @@ MainWindow::MainWindow(QWidget *parent)
     {
       qDebug()<<t;
     }
-    startDeviceDiscovery();
+    NixBlDev = new Device;
+   // NixBlDev->
+  //  NixBlDev->startDeviceDiscovery();
+
+   // NixBlDev->scanServices("00:80:E1:26:CB:1A");
+
+
+    //startDeviceDiscovery();
  //   m_deviceDiscoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
 
 }
@@ -25,33 +33,56 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    ui->label->setText("Хуй");
+   // ui->label->setText("Поиск");
+    NixBlDev->startDeviceDiscovery();
+    connect(NixBlDev, &Device::devicesUpdated,
+            this, &MainWindow::deviceDiscovered);
+
+    //ListDev = new QVariant;
+   // QVariant ListDev = NixBlDev->getDevices();
+
+}
+
+void MainWindow::deviceDiscovered()
+{
+  qDebug()<< NixBlDev->getDevices().toStringList();
+  connect(NixBlDev, &Device::servicesUpdated, this,
+          &MainWindow::servicesUpd);
+  NixBlDev->scanServices("00:80:E1:26:CB:1A");
+
+}
+
+void MainWindow::servicesUpd()
+{
+ qDebug()<<"Servise Upd" ;
 }
 
 
-
-void MainWindow::startDeviceDiscovery()
+void MainWindow::on_pushButton_2_clicked()
 {
-  // Create a discovery agent and connect to its signals
- // QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
- // connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
- //       this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
+ NixBlDev->connectToService("0000fe40-cc7a-482a-984a-7f2ed5b3e58f");
 
-  // Start a discovery
-// discoveryAgent->start();
-//  discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
-
-   QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent();
-   // discoveryAgent->setLowEnergyDiscoveryTimeout(5000);
-    connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
-            this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
-
-    discoveryAgent->start();//QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
-// In your local slot, read information about the found devices
-void MainWindow::deviceDiscovered(const QBluetoothDeviceInfo &device)
+void MainWindow::on_led_button_clicked()
 {
-    //if (device.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)
-  qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+    QByteArray Led;
+    Led.resize(2);
+    //Led[0]=0x01;
+    //Led[1]=0x01;
+
+    static uint8_t fl=0;
+    if (!fl)
+    {
+     Led=QByteArray::fromHex("0101");
+     ui->led_button->setText("LED ON");
+    }
+    else
+      {
+       Led=QByteArray::fromHex("0000");
+       ui->led_button->setText("LED OFF");
+      }
+
+     NixBlDev->SetCharacteristics(Led,"0000fe40-cc7a-482a-984a-7f2ed5b3e58f");
+     fl=~fl;
 }

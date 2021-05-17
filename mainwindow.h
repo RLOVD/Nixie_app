@@ -3,8 +3,10 @@
 
 #include <QMainWindow>
 #include <QDebug>
-#include <QBluetoothDeviceDiscoveryAgent>
-#include <QBluetoothDeviceInfo>
+#include "module_bluetoth/device.h"
+//#include <QBluetoothDeviceDiscoveryAgent>
+//#include <QBluetoothDeviceInfo>
+//#include <QLowEnergyController>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,13 +19,26 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Device *NixBlDev;
+  //  QVariant *ListDev;
+
 
 private slots:
     void on_pushButton_clicked();
-    void deviceDiscovered(const QBluetoothDeviceInfo &device);
+    //void deviceDiscovered(const QBluetoothDeviceInfo &device);
+     void deviceDiscovered();
+     void servicesUpd();
+
+     void on_pushButton_2_clicked();
+
+     void on_pushButton_3_clicked();
+
+     void on_led_button_clicked();
 
 private:
     Ui::MainWindow *ui;
-    void startDeviceDiscovery();
+  //  void startDeviceDiscovery();
+  // QBluetoothDeviceDiscoveryAgent *m_deviceDiscoveryAgent;
+  // QLowEnergyController *m_control;
 };
 #endif // MAINWINDOW_H
